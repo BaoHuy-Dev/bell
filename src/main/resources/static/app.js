@@ -96,23 +96,34 @@ function playBuzzSound() {
         audioCtx.resume();
     }
     
-    // Create an oscillator for the buzzer tone
-    const oscillator = audioCtx.createOscillator();
+    const duration = 1.5; // Longer duration (1.5 seconds)
+    const currentTime = audioCtx.currentTime;
+
+    // Create two oscillators for a harsh dissonance/beating effect
+    const osc1 = audioCtx.createOscillator();
+    const osc2 = audioCtx.createOscillator();
     const gainNode = audioCtx.createGain();
     
-    // Buzzer uses a sawtooth wave for a harsh, classic game show sound
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(150, audioCtx.currentTime); // Starting pitch
-    oscillator.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3); // Pitch drops slightly
+    // Square and Sawtooth combined for a very grating, deafening noise
+    osc1.type = 'square';
+    osc2.type = 'sawtooth';
     
-    // Volume envelope
-    gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    // Detuned frequencies (150Hz and 155Hz) to create a nasty buzzing beat
+    osc1.frequency.setValueAtTime(150, currentTime);
+    osc2.frequency.setValueAtTime(155, currentTime); 
     
-    oscillator.connect(gainNode);
+    // Max volume (louder: 1.5 gain) and slower fade out
+    gainNode.gain.setValueAtTime(1.5, currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, currentTime + duration);
+    
+    // Connect everything
+    osc1.connect(gainNode);
+    osc2.connect(gainNode);
     gainNode.connect(audioCtx.destination);
     
-    // Play for half a second
-    oscillator.start();
-    oscillator.stop(audioCtx.currentTime + 0.5);
+    // Play the sound
+    osc1.start(currentTime);
+    osc2.start(currentTime);
+    osc1.stop(currentTime + duration);
+    osc2.stop(currentTime + duration);
 }
